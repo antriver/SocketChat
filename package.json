@@ -1,0 +1,11 @@
+{
+	"name": "tsl-chat",
+	"preferGlobal": false,
+	"version": "1.0.0",
+	"author": "Anthony Kuske <www.anthonykuske.com>",
+	"description": "Chat room for top-site-list.com",
+	"dependencies": {
+		"express" : "latest",
+		"socket.io" : "latest"
+	}
+}
