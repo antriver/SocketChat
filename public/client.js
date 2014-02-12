@@ -41,7 +41,7 @@ $(document).on('submit', '#newMessage', function() {
 
 
 //socket.io
-var socket = io.connect('http://localhost');
+var socket = io.connect('http://' + document.location.hostname);
 
 socket.on('info', function(data) {
 	console.log(data);
