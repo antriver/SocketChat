@@ -1,4 +1,6 @@
-function ChatRoom() {
+var ChatRoom = function(name) {
+
+	this.name = name;
 
 	//List of users in the room
 	this.users = [];
@@ -14,7 +16,7 @@ ChatRoom.prototype.addPerson = function(socket, user) {
 	this.users.push(user);
 
 	//Send a message saying the user joined
-	socket.emit
+	//socket.emit
 
 };
 

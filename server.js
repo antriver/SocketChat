@@ -2,7 +2,8 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
-var room = require('./chatRoom.js');
+var ChatRoom = require('./ChatRoom.js');
+var crypto = require('crypto');
 
 
 //Start server on port 3000
@@ -25,26 +26,41 @@ app.get('/', function (req, res) {
 //Reduce number of io debug messages
 io.set('log level', 2);
 
+var rooms = {};
+
+//The default room
+rooms.lobby = new ChatRoom('lobby');
 
 //io connections
 io.sockets.on('connection', function(socket) {
+
+	var clientID = generateClientID();
+	console.log('New client connected: ' + clientID);
 
 	socket.emit('info', { msg: 'Welcome!' });
 
 	socket.on('message', function (data) {
 		console.log(data);
 
+		data.clientID = clientID;
 		socket.broadcast.emit('message', data);
+
 	});
 
 });
 
+
+function generateClientID() {
+	return new Date().getTime() + '' + Math.ceil(Math.random() * 1000);
+}
+
 //Send a message every 30 seconds just for testing
 setInterval(function(){
 
-	socket.broadcast.emit('message', {
+	io.sockets.emit('message', {
+		clientID: 'server',
 		time: new Date(),
-		text: 'Time time is ' + new Date().toUTCString()
+		text: 'Hello, I\'m the server. The time is ' + new Date().toUTCString()
 	});
 
 }, 30000);

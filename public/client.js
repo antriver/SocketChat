@@ -1,6 +1,6 @@
 function makeMessageHTML(data) {
 	var h = '<li>';
-		//h += '<h5>' + data.time + '</p>';
+		h += '<h5>Message from: ' + data.clientID + '</h5>';
 		h += '<p>' + data.text + '</p>';
 	h += '</li>';
 	return h;
@@ -33,6 +33,7 @@ $(document).on('submit', '#newMessage', function() {
 	newMessageText.val('');
 
 	//Show message to ourself
+	msg.clientID = 'self';
 	showMessage(msg);
 
 	return false;
