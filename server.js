@@ -29,10 +29,10 @@ app.get('/admin', function (req, res) {
 	r += '<h1>Chat Status</h1>';
 
 	r += '<h2>Rooms</h2>';
-	r += '<pre>' + JSON.stringify(rooms, undefined, 2) + '</pre>';
+	r += '<pre>' + JSON.stringify(rooms, undefined, 4) + '</pre>';
 
 	r += '<h2>Users</h2>';
-	r += '<pre>' + JSON.stringify(users, undefined, 2) + '</pre>';
+	r += '<pre>' + JSON.stringify(users, undefined, 4) + '</pre>';
 
 	res.end(r);
 });
@@ -49,12 +49,17 @@ io.set('log level', 2);
 
 //List of available rooms
 var rooms = {
-	lobby: new ChatRoom('lobby')
+	lobby: new ChatRoom('lobby'),
+	otherroom: new ChatRoom('otherroom')
 };
 
 
 //List of connected clients
 var users = {};
+
+//Create a "server" user
+var serverUser = new ChatUser('Sever');
+users[0] = serverUser;
 
 
 //io connections
@@ -69,7 +74,7 @@ io.sockets.on('connection', function(socket) {
 	//(Client should change room to the lobby upon connection)
 	socket.on('changeRoom', function(data){
 
-		console.log('switchRoom', data);
+		console.log('changeRoom', data);
 
 		//Leave the old room if set
 		if (users[socket.id].room !== null) {
@@ -79,24 +84,31 @@ io.sockets.on('connection', function(socket) {
 		users[socket.id].setRoom(data.room);
 		rooms[data.room].join(socket, users[socket.id]);
 
+		socket.emit('changedRoom', {
+			room: rooms[data.room]
+		});
+
 	});
+
 
 	//User changes username
 	socket.on('changeUsername', function(data){
+		console.log('changeUsername', data);
+
 		users[socket.id].setUsername(data.username);
+
+		socket.emit('changedUsername', {
+			user: users[socket.id]
+		});
 	});
 
 
-	//New message received
+	//New message sent
 	socket.on('message', function(data) {
 
-		console.log('Message from: ', socket.id);
+		console.log('Message from: ' + socket.id, data);
 
-		console.log(data);
-		data.clientID = socket.id;
-		socket.broadcast.emit('message', data);
-
-		++users[socket.id].messagesSent;
+		rooms[users[socket.id].room].sendMessage(socket, users[socket.id], data);
 	});
 
 
@@ -113,16 +125,13 @@ io.sockets.on('connection', function(socket) {
 });
 
 
-function generateClientID() {
-	return new Date().getTime() + '' + Math.ceil(Math.random() * 1000);
-}
-
 //Send a message every 30 seconds just for testing
 setInterval(function(){
 
 	io.sockets.emit('message', {
-		time: new Date(),
-		text: 'Hello, I\'m the server. The time is ' + new Date().toUTCString()
+		from: serverUser,
+		date: new Date(),
+		text: 'Hello, I\'m the server. Sending you a message so you can see this is still alive. The time is ' + new Date().toUTCString()
 	});
 
-}, 30000);
+}, 15000);

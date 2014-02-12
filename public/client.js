@@ -1,13 +1,17 @@
-function makeMessageHTML(data) {
+function makeMessageHTML(message) {
 	var h = '<li>';
-		h += '<h5>Message from: ' + data.clientID + '</h5>';
-		h += '<p>' + data.text + '</p>';
+		h += '<h5>Message from: ' + message.from.username + ' at ' + message.date.toUTCString() + '</h5>';
+		h += '<p>' + message.text + '</p>';
 	h += '</li>';
 	return h;
 }
 
-function showMessage(data) {
-	$('#messages').append(makeMessageHTML(data));
+function showMessage(message) {
+	if (!(message.date instanceof Date)) {
+		//Convert date string back into a date object
+		message.date = new Date(message.date);
+	}
+	$('#messages').append(makeMessageHTML(message));
 }
 
 //Events
@@ -20,21 +24,22 @@ $(document).on('submit', '#newMessage', function() {
 		return false;
 	}
 
-	var msg = {
-		text: text
+	var message = {
+		text: text,
 	};
 
 	//Send message
-	socket.emit('message', {
-		text: text
-	});
+	socket.emit('message', message);
+
+	//Add the things we need to display the message but didn't need to send to the server
+	message.date = new Date();
+	message.from = user;
+
+	//Show message to ourself
+	showMessage(message);
 
 	//Clear input
 	newMessageText.val('');
-
-	//Show message to ourself
-	msg.clientID = 'self';
-	showMessage(msg);
 
 	return false;
 });
@@ -43,25 +48,44 @@ $(document).on('submit', '#newMessage', function() {
 //socket.io
 var socket = io.connect('http://' + document.location.hostname);
 
-function switchRoom(roomName, username) {
+
+//Current room
+function changeRoom(roomName) {
 	socket.emit('changeRoom', {room:roomName});
 }
+//Room changed callback
+socket.on('changedRoom', function(res){
+	console.log('changedRoom', res);
+	$('#roomName').text(res.room.name);
+	$('#messages').html('');
+	for (var i in res.room.messages) {
+		showMessage(res.room.messages[i]);
+	}
+});
 
-$(document).ready(function(){
+//Current user
+var user = {};
 
-	var username = prompt('Please pick a username:');
+function changeUsername(username) {
 	socket.emit('changeUsername', {username:username});
-
-})
-
-switchRoom('lobby');
-
-socket.on('info', function(data) {
-	console.log(data);
+}
+//Username changed callback
+socket.on('changedUsername', function(res){
+	console.log('changedUsername', res);
+	user = res.user;
 });
 
-socket.on('message', function(msg) {
-	showMessage(msg);
+
+//Message Received
+socket.on('message', function(message) {
+	showMessage(message);
 });
 
+
+//On load, set the username and room
+$(document).ready(function(){
+	var username = prompt('Please pick a username:');
+	changeUsername(username);
+	changeRoom('lobby');
+});
 
