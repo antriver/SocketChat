@@ -1,9 +1,9 @@
 {
-	"name": "tsl-chat",
+	"name": "SocketChat",
 	"preferGlobal": false,
 	"version": "1.0.0",
 	"author": "Anthony Kuske <www.anthonykuske.com>",
-	"description": "Chat room for top-site-list.com",
+	"description": "Chat room built using socket.io",
 	"dependencies": {
 		"express" : "latest",
 		"socket.io" : "latest"
