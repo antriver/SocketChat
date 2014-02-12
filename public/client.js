@@ -43,6 +43,19 @@ $(document).on('submit', '#newMessage', function() {
 //socket.io
 var socket = io.connect('http://' + document.location.hostname);
 
+function switchRoom(roomName, username) {
+	socket.emit('changeRoom', {room:roomName});
+}
+
+$(document).ready(function(){
+
+	var username = prompt('Please pick a username:');
+	socket.emit('changeUsername', {username:username});
+
+})
+
+switchRoom('lobby');
+
 socket.on('info', function(data) {
 	console.log(data);
 });

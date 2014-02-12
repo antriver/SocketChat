@@ -3,20 +3,25 @@ var ChatRoom = function(name) {
 	this.name = name;
 
 	//List of users in the room
-	this.users = [];
+	this.users = {};
 
 	this.status = "available";
 
 };
 
 //User joins a room
-ChatRoom.prototype.addPerson = function(socket, user) {
+ChatRoom.prototype.join = function(socket, user) {
 
 	//Add user to the list
-	this.users.push(user);
+	this.users[socket.id] = user;
 
-	//Send a message saying the user joined
-	//socket.emit
+};
+
+
+//User leaves a room
+ChatRoom.prototype.leave = function(socket) {
+
+	delete this.users[socket.id];
 
 };
 
