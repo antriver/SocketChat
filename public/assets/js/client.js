@@ -1,9 +1,10 @@
 
 // socket.io connection
-// This needs to be changed per site
+
+var subDirectory = document.location.pathname.replace(/^\/|\/$/g, '');
 var socket = io.connect(
 	document.location.origin,
-	{resource: 'chat/socket.io'}
+	{resource: subDirectory + '/socket.io'}
 );
 
 // Current user info
