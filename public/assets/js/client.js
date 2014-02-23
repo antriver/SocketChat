@@ -1,8 +1,9 @@
 
 // socket.io connection
+// This needs to be changed per site
 var socket = io.connect(
 	document.location.origin,
-	{resource: document.location.pathname + 'socket.io'}
+	{resource: 'chat/socket.io'}
 );
 
 // Current user info
