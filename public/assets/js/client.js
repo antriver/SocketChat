@@ -1,17 +1,16 @@
 
-// Where is socket.io running?
-// Assumes the index.html page was served up at the same URL, so
-// try using that.
-var socketURL = document.location.pathname;
-
-// socket.io
-var socket = io.connect(socketURL);
+// socket.io connection
+var socket = io.connect(
+	document.location.origin + document.location.pathname,
+	{resource: document.location.pathname + '/socket.io'}
+);
 
 // Current user info
 var user = {};
 
 // Name of the chat room the user is currently in
 var currentRoom = false;
+
 
 // Play sounds?
 var soundOn = true;
