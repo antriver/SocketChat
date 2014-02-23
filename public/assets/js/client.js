@@ -1,8 +1,8 @@
 
 // socket.io connection
 var socket = io.connect(
-	document.location.origin + document.location.pathname,
-	{resource: document.location.pathname + '/socket.io'}
+	document.location.origin,
+	{resource: document.location.pathname + 'socket.io'}
 );
 
 // Current user info
