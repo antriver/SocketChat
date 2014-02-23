@@ -20,10 +20,15 @@ ChatRoom.prototype.join = function(socket, user) {
 	//Subscribe this socket to this room
 	socket.join(this.name);
 
+	socket.broadcast.to(this.name).emit('userJoin', user);
+
 };
 
 //User leaves a room
 ChatRoom.prototype.leave = function(socket) {
+
+	var user = this.users[socket.id];
+	socket.broadcast.to(this.name).emit('userLeave', user);
 
 	delete this.users[socket.id];
 	socket.leave(this.name);
@@ -32,6 +37,7 @@ ChatRoom.prototype.leave = function(socket) {
 
 ChatRoom.prototype.sendMessage = function(socket, user, data) {
 	var message = {
+		room: this.name,
 		from: user,
 		text: data.text,
 		date: new Date()

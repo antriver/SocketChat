@@ -3,14 +3,13 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 
-var ChatRoom = require('./ChatRoom.js');
-var ChatUser = require('./ChatUser.js');
+var ChatRoom = require('./model/ChatRoom.js');
+var ChatUser = require('./model/ChatUser.js');
 
 
 
 //Start server on port 3000
 server.listen(3000);
-
 
 //Static routes
 app.configure(function(){
@@ -18,9 +17,9 @@ app.configure(function(){
 });
 
 //Routes
-app.get('/', function (req, res) {
+/*app.get('/', function (req, res) {
 	res.sendfile(__dirname + '/public/index.html');
-});
+});*/
 
 app.get('/admin', function (req, res) {
 
@@ -58,7 +57,7 @@ var rooms = {
 var users = {};
 
 //Create a "server" user
-var serverUser = new ChatUser('Sever');
+var serverUser = new ChatUser(0, 'Serverus Snape');
 users[0] = serverUser;
 
 
@@ -68,7 +67,7 @@ io.sockets.on('connection', function(socket) {
 	console.log('New connection: ', socket.id);
 
 	//Create a new uset
-	users[socket.id] = new ChatUser();
+	users[socket.id] = new ChatUser(socket.id);
 
 	//User changed room
 	//(Client should change room to the lobby upon connection)
@@ -105,10 +104,12 @@ io.sockets.on('connection', function(socket) {
 
 	//New message sent
 	socket.on('message', function(data) {
-
 		console.log('Message from: ' + socket.id, data);
-
-		rooms[users[socket.id].room].sendMessage(socket, users[socket.id], data);
+		try {
+			rooms[users[socket.id].room].sendMessage(socket, users[socket.id], data);
+		} catch (e) {
+			console.log(e);
+		}
 	});
 
 
@@ -117,7 +118,7 @@ io.sockets.on('connection', function(socket) {
 		try {
 			rooms[users[socket.id].room].leave(socket);
 			delete users[socket.id];
-		} catch(e) {
+		} catch (e) {
 			console.log("Can't remove user from room", e);
 		}
 	});
@@ -125,13 +126,16 @@ io.sockets.on('connection', function(socket) {
 });
 
 
+//Put serverUser in the lobby
+rooms.lobby.users[0] = serverUser;
 //Send a message every 30 seconds just for testing
 setInterval(function(){
 
 	io.sockets.emit('message', {
+		room: 'lobby',
 		from: serverUser,
 		date: new Date(),
 		text: 'Hello, I\'m the server. Sending you a message so you can see this is still alive. The time is ' + new Date().toUTCString()
 	});
 
-}, 15000);
+}, 60000);

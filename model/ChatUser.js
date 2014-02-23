@@ -1,4 +1,7 @@
-var ChatUser = function(username) {
+var ChatUser = function(socketid, username) {
+
+	this.id = socketid;
+
 	this.username = username;
 
 	//Name of the room the user is in
