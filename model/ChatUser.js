@@ -1,8 +1,8 @@
-var ChatUser = function(socketid, username) {
+var ChatUser = function(socketid, username, avatar) {
 
 	this.id = socketid;
-
 	this.username = username;
+	this.avatar = avatar;
 
 	//Name of the room the user is in
 	this.room = null;

@@ -104,7 +104,11 @@ io.sockets.on('connection', function(socket) {
 	console.log(socket.handshake);
 
 	//Create a new user
-	users[socket.id] = new ChatUser(socket.id);
+	users[socket.id] = new ChatUser(socket.id, socket.handshake.user.username, socket.handshake.user.avatar);
+
+	socket.emit('changedUsername', {
+		user: users[socket.id]
+	});
 
 	//User changed room
 	//(Client should change room to the lobby upon connection)
@@ -124,18 +128,6 @@ io.sockets.on('connection', function(socket) {
 			room: rooms[data.room]
 		});
 
-	});
-
-
-	//User changes username
-	socket.on('changeUsername', function(data){
-		console.log('changeUsername', data);
-
-		users[socket.id].setUsername(data.username);
-
-		socket.emit('changedUsername', {
-			user: users[socket.id]
-		});
 	});
 
 

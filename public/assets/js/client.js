@@ -36,8 +36,8 @@ var soundOn = true;
 // On page load set the username and room
 $(document).ready(function(){
 	setupSounds();
-	var username = prompt('Please pick a username:');
-	changeUsername(username);
+	//var username = prompt('Please pick a username:');
+	//changeUsername(username);
 	changeRoom('lobby');
 });
 
