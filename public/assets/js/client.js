@@ -147,6 +147,7 @@ function removeUser(room, user) {
 
 function makeUserHTML(user) {
 	var u = '<li data-id="' + user.id + '">';
+		u += '<img class="avatar" src="' + user.avatar + '" />';
 		u += user.username;
 	u += '</li>';
 	return u;
@@ -161,7 +162,10 @@ function makeMessageHTML(message) {
 	//Newlines to line breaks
 	message.text = nl2br(message.text);
 	var m = '<li>';
-		m += '<h4 class="author"><span class="name">' + message.from.username + '</span></h4>';
+		m += '<h4 class="author">';
+			m += '<img class="avatar" src="' + message.from.avatar + '" />';
+			m += '<span class="name">' + message.from.username + '</span>';
+		m += '</h4>';
 		m += '<time>' + formatTime(message.date) + '</time>';
 		m += '<p>' + message.text + '</p>';
 	m += '</li>';
