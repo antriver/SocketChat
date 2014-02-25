@@ -91,17 +91,11 @@ var rooms = {
 //List of connected clients
 var users = {};
 
-//Create a "server" user
-var serverUser = new ChatUser(0, 'Serverus Snape');
-users[0] = serverUser;
-
 
 //io connections
 io.sockets.on('connection', function(socket) {
 
 	console.log('New connection: ', socket.id);
-
-	console.log(socket.handshake);
 
 	//Create a new user
 	users[socket.id] = new ChatUser(socket.id, socket.handshake.user.username, socket.handshake.user.avatar);
@@ -155,7 +149,13 @@ io.sockets.on('connection', function(socket) {
 });
 
 
+
+//Create a "server" user
+var serverUser = new ChatUser(0, 'Serverus Snape', 'http://www.top-site-list.com/assets/img/default-avatar.jpg');
+users[0] = serverUser;
+
 //Put serverUser in the lobby
+//
 rooms.lobby.users[0] = serverUser;
 //Send a message every 30 seconds just for testing
 setInterval(function(){
