@@ -1,12 +1,14 @@
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
+var cookie = require("cookie");
 var io = require('socket.io').listen(server);
+var request = require('request');
+
+app.use(express.cookieParser());
 
 var ChatRoom = require('./model/ChatRoom.js');
 var ChatUser = require('./model/ChatUser.js');
-
-
 
 //Start server on port 3000
 server.listen(3000);
@@ -40,6 +42,37 @@ app.get('/admin', function (req, res) {
 //Reduce number of io debug messages
 io.set('log level', 2);
 
+/**
+ * TSL Cookie Authorization
+ */
+io.set('authorization', function (handshakeData, accept) {
+
+	if (handshakeData.headers.cookie.sessionKey) {
+
+		request({
+			url: 'https://www.top-site-list.com/api/user.php',
+			qs: {
+				key: handshakeData.headers.cookie.sessionKey,
+			}
+		}, function(error, response, body) {
+			if (!error && response.statusCode == 200) {
+				res = JSON.parse(body);
+				console.log(res);
+				if (res.user) {
+					handshakeData.user = res.user;
+					accept(null, true);
+				} else {
+					accept("You need to login", false);
+				}
+
+			} else {
+				accept("Unable to authenticate with TSL server", false);
+			}
+		});
+	}
+
+	accept("You need to login", false);
+});
 
 /**
  * Chat
@@ -66,7 +99,9 @@ io.sockets.on('connection', function(socket) {
 
 	console.log('New connection: ', socket.id);
 
-	//Create a new uset
+	console.log(socket.handshake);
+
+	//Create a new user
 	users[socket.id] = new ChatUser(socket.id);
 
 	//User changed room

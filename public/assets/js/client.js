@@ -2,10 +2,22 @@
 // socket.io connection
 
 var subDirectory = document.location.pathname.replace(/^\/|\/$/g, '');
-var socket = io.connect(
-	document.location.origin,
-	{resource: subDirectory + '/socket.io'}
-);
+if (subDirectory.length > 0) {
+	var socket = io.connect(
+		document.location.origin,
+		{resource: subDirectory + '/socket.io'}
+	);
+} else {
+	var socket = io.connect(document.location.origin);
+}
+
+socket.on('error', function(data) {
+	console.log(data);
+	if (data == 'handshake error') {
+		//Not logged in
+		window.location = 'http://www.top-site-list.com/login.php?next=/chat';
+	}
+});
 
 // Current user info
 var user = {};

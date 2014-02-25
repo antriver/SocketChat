@@ -6,6 +6,8 @@
 	"description": "Chat room built using socket.io",
 	"dependencies": {
 		"express" : "latest",
-		"socket.io" : "latest"
+		"request" : "latest",
+		"socket.io" : "latest",
+		"cookie" : "latest"
 	}
 }
