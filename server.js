@@ -47,9 +47,9 @@ io.set('log level', 2);
  */
 io.set('authorization', function (handshakeData, accept) {
 
-	console.log(handshakeData.headers.cookie);
+	handshakeData.cookie = cookie.parse(handshakeData.headers.cookie);
 
-	if (handshakeData.headers.cookie.sessionKey) {
+	if (handshakeData.cookie.sessionKey) {
 
 		request({
 			url: 'http://www.top-site-list.com/api/user.php',
