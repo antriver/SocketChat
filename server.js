@@ -54,7 +54,7 @@ io.set('authorization', function (handshakeData, accept) {
 		request({
 			url: 'http://www.top-site-list.com/api/user.php',
 			qs: {
-				key: handshakeData.headers.cookie.sessionKey,
+				key: handshakeData.cookie.sessionKey,
 			}
 		}, function(error, response, body) {
 			if (!error && response.statusCode == 200) {
@@ -71,9 +71,9 @@ io.set('authorization', function (handshakeData, accept) {
 				accept("Unable to authenticate with TSL server", false);
 			}
 		});
+	} else {
+		accept("No session cookie", false);
 	}
-
-	accept("No session cookie", false);
 });
 
 /**
