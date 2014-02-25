@@ -50,7 +50,7 @@ io.set('authorization', function (handshakeData, accept) {
 	if (handshakeData.headers.cookie.sessionKey) {
 
 		request({
-			url: 'https://www.top-site-list.com/api/user.php',
+			url: 'http://www.top-site-list.com/api/user.php',
 			qs: {
 				key: handshakeData.headers.cookie.sessionKey,
 			}
@@ -62,7 +62,7 @@ io.set('authorization', function (handshakeData, accept) {
 					handshakeData.user = res.user;
 					accept(null, true);
 				} else {
-					accept("You need to login", false);
+					accept("Validation with TSL failed " + body, false);
 				}
 
 			} else {
@@ -71,7 +71,7 @@ io.set('authorization', function (handshakeData, accept) {
 		});
 	}
 
-	accept("You need to login", false);
+	accept("No session cookie", false);
 });
 
 /**
