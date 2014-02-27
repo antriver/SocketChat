@@ -50,9 +50,12 @@ io.set('log level', 2);
  */
 io.set('authorization', function (handshakeData, accept) {
 
-	if (handshakeData.headers.cookie) {
-		handshakeData.cookie = cookie.parse(handshakeData.headers.cookie);
+	if (!handshakeData.headers.cookie) {
+		accept("No session cookie", false);
+		return;
 	}
+
+	handshakeData.cookie = cookie.parse(handshakeData.headers.cookie);
 
 	if (handshakeData.cookie.sessionKey) {
 
