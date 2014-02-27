@@ -8,6 +8,7 @@
 		"express" : "latest",
 		"request" : "latest",
 		"socket.io" : "latest",
-		"cookie" : "latest"
+		"cookie" : "latest",
+		"mysql2": "latest"
 	}
 }

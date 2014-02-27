@@ -1,14 +1,30 @@
-var ChatRoom = function(name) {
+var ChatRoom = function(name, logger) {
 
+	// Name of the room
 	this.name = name;
 
-	//List of users in the room
+	// Users in the room
 	this.users = {};
 
+	// Is the room open? (This currently does nothing)
 	this.status = "available";
 
+	// Messages that have been sent
 	this.messages = [];
 
+	// Logging messages
+	this.logBuffer = [];
+	this.logger = logger;
+	this.startLogTimer();
+
+	this.toJSON = function() {
+        return {
+        	name: this.name,
+        	users: this.users,
+        	status: this.status,
+        	messages: this.messages
+        };
+    };
 };
 
 //User joins a room
@@ -36,6 +52,9 @@ ChatRoom.prototype.leave = function(socket) {
 };
 
 ChatRoom.prototype.sendMessage = function(socket, user, data) {
+
+	data.text = escape(data.text);
+
 	var message = {
 		room: this.name,
 		from: user,
@@ -45,6 +64,54 @@ ChatRoom.prototype.sendMessage = function(socket, user, data) {
 	++user.messagesSent;
 	socket.broadcast.to(this.name).emit('message', message);
 	this.messages.push(message);
+	this.logMessage(message);
 };
+
+
+
+/**
+* Logging
+*/
+
+ChatRoom.prototype.logMessage = function(message) {
+
+	this.logBuffer.push(message);
+	console.log(this.logBuffer.length + ' messages in log buffer');
+	if (this.logBuffer.length >= 10) {
+		this.writeMessageLog();
+	}
+}
+
+ChatRoom.prototype.writeMessageLog = function() {
+console.log(this.name + ' writeMessageLog');
+
+	if (this.logBuffer.length < 1) {
+		this.startLogTimer();
+		return;
+	}
+
+	var messages = this.logBuffer.slice(0); //Clone the array
+	this.logBuffer = [];
+
+	this.stopLogTimer();
+	console.log(this.name + ' writing message log');
+
+	var self = this;
+	this.logger.logMessages(this.name, messages, function(){
+		self.startLogTimer();
+	});
+
+};
+
+ChatRoom.prototype.startLogTimer = function() {
+	this.stopLogTimer();
+	var self = this;
+	this.logTimer = setTimeout(function(){ console.log('logTimer timeout'); self.writeMessageLog(); }, 30000);
+}
+
+ChatRoom.prototype.stopLogTimer= function() {
+	clearTimeout(this.logTimer);
+	this.logTimer = null;
+}
 
 module.exports = ChatRoom;

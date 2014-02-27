@@ -1,3 +1,4 @@
+// Load modules
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
@@ -7,8 +8,10 @@ var request = require('request');
 
 app.use(express.cookieParser());
 
+var CFG = require('./config.js');
 var ChatRoom = require('./model/ChatRoom.js');
 var ChatUser = require('./model/ChatUser.js');
+var DatabaseLogger = require('./DatabaseLogger.js');
 
 //Start server on port 3000
 server.listen(3000);
@@ -83,8 +86,8 @@ io.set('authorization', function (handshakeData, accept) {
 
 //List of available rooms
 var rooms = {
-	lobby: new ChatRoom('lobby'),
-	otherroom: new ChatRoom('otherroom')
+	lobby: new ChatRoom('lobby', new DatabaseLogger(CFG)),
+	//otherroom: new ChatRoom('otherroom', new DatabaseLogger(CFG))
 };
 
 
@@ -98,7 +101,7 @@ io.sockets.on('connection', function(socket) {
 	console.log('New connection: ', socket.id);
 
 	//Create a new user
-	users[socket.id] = new ChatUser(socket.id, socket.handshake.user.username, socket.handshake.user.avatar);
+	users[socket.id] = new ChatUser(socket.id, socket.handshake.user.id, socket.handshake.user.username, socket.handshake.user.avatar);
 
 	socket.emit('changedUsername', {
 		user: users[socket.id]
@@ -151,7 +154,7 @@ io.sockets.on('connection', function(socket) {
 
 
 //Create a "server" user
-var serverUser = new ChatUser(0, 'Serverus Snape', 'http://www.top-site-list.com/assets/img/default-avatar.jpg');
+var serverUser = new ChatUser(0, 0, 'Serverus Snape', 'http://www.top-site-list.com/assets/img/default-avatar.jpg');
 users[0] = serverUser;
 
 //Put serverUser in the lobby
