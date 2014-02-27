@@ -179,8 +179,6 @@ function showMessage(message, sound) {
 		message.date = new Date(message.date);
 	}
 
-	message.text = $('<div/>').text(message.text).html();
-
 	var html = makeMessageHTML(message);
 	$('.messages[data-room=' + message.room + ']').append(html);
 
@@ -257,6 +255,9 @@ $(document).on('submit', '#newMessage', function() {
 	message.from = user;
 
 	//Show message to ourself
+
+	// Escape the text
+	message.text = $('<div/>').text(message.text).html();
 	showMessage(message);
 
 	//Clear input
