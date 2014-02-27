@@ -1,3 +1,7 @@
+var Entities = require('html-entities').AllHtmlEntities;
+
+entities = new Entities();
+
 var ChatRoom = function(name, logger) {
 
 	// Name of the room
@@ -53,7 +57,7 @@ ChatRoom.prototype.leave = function(socket) {
 
 ChatRoom.prototype.sendMessage = function(socket, user, data) {
 
-	data.text = escape(data.text);
+	data.text = entities.encode(data.text);
 
 	var message = {
 		room: this.name,
