@@ -178,6 +178,9 @@ function showMessage(message, sound) {
 		//Convert date string back into a date object
 		message.date = new Date(message.date);
 	}
+
+	message.text = $('<div/>').text(message.text).html();
+
 	var html = makeMessageHTML(message);
 	$('.messages[data-room=' + message.room + ']').append(html);
 
