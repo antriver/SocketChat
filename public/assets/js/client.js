@@ -1,4 +1,34 @@
 
+function uniqid() {
+	return (new Date().getTime()).toString(16);
+}
+
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
+var $_GET = {};
+
+document.location.search.replace(/\??(?:([^=]+)=([^&]*)&?)/g, function () {
+    function decode(s) {
+        return decodeURIComponent(s.split("+").join(" "));
+    }
+
+    $_GET[decode(arguments[1])] = decode(arguments[2]);
+});
+
+$(function(){
+
+	if ($_GET['embed'] == 1) {
+		$('#controls').append('<a class="btn btn-mini" href="/chat" target="_top"><i class="fa fa-external-link-square"></i> Maximize</a>');
+	}
+
+});
+
 // socket.io connection
 
 var subDirectory = document.location.pathname.replace(/^\/|\/$/g, '');
@@ -20,14 +50,35 @@ socket.on('error', function(data) {
 });
 
 // Current user info
-var user = {};
+var user = null;
 
 // Name of the chat room the user is currently in
 var currentRoom = false;
+var currentPrivateMessagesUserID = null;
 
 
 // Play sounds?
 var soundOn = true;
+if ($.cookie('chatSounds') === 'false') {
+	soundOn = false;
+}
+
+function setSoundButton() {
+	if (soundOn) {
+		$('#soundToggle').addClass('active').html('<i class="fa fa-volume-up"></i> Sounds are on');
+	} else {
+		$('#soundToggle').removeClass('active').html('<i class="fa fa-volume-off"></i> Sounds are off');
+	}
+}
+
+$(document).on('click', '#soundToggle', function(){
+	soundOn = soundOn ? false : true;
+	$.cookie('chatSounds', soundOn ,{ expires: 365});
+	setSoundButton();
+	return false;
+});
+
+setSoundButton();
 
 /**
  * Setup
@@ -38,7 +89,7 @@ $(document).ready(function(){
 	setupSounds();
 	//var username = prompt('Please pick a username:');
 	//changeUsername(username);
-	changeRoom('lobby');
+	//changeRoom('lobby');
 });
 
 // Called when connecting the first time, or reconnecting
@@ -55,6 +106,24 @@ socket.on('connect', function(e) {
 
 });
 
+socket.on('banned', function (e) {
+	alert("You have been banned from the chat:\n" + e.reason);
+	socket.disconnect();
+	socket = null;
+	window.location = '/';
+});
+
+socket.on('kicked', function (e) {
+	alert("You have been kicked from the chat:\n" + e.reason);
+	socket.disconnect();
+	socket = null;
+	window.location = '/';
+});
+
+socket.on('disconnect', function() {
+	showInfoMessage("You've been disconnected from the chat!", 'exclamation-triangle', 'red');
+});
+
 // Change room
 function changeRoom(roomName) {
 	socket.emit('changeRoom', {room:roomName});
@@ -63,7 +132,7 @@ function changeRoom(roomName) {
 // Room changed callback
 socket.on('changedRoom', function(res){
 	console.log('changedRoom', res);
-	addNewRoom(res.room.name);
+	addNewRoom(res.room.name, res.room.displayName);
 
 	// Display messages already in the room
 	for (var i in res.room.messages) {
@@ -77,40 +146,141 @@ socket.on('changedRoom', function(res){
 	showRoom(res.room.name);
 
 	$('#newMessage textarea').focus();
-	showInfoMessage('Welcome, ' + user.username + '!');
+
+	if (Object.size(res.room.users) == 1) {
+		str = "There is 1 person chatting.";
+	} else {
+		str = "There are " + Object.size(res.room.users) + " people chatting.";
+	}
+	showInfoMessage("Welcome to Top Site List Planet chat! " + str, 'check');
+
+	if (!user) {
+		showInfoMessage('Without logging in you can only view the chat. Please <a href="/login">login</a> or <a href="/signup">signup</a> to talk in the chat.', 'user', 'red');
+	}
 });
 
-function addNewRoom(roomName) {
-
-	// HTML for the new room
-	if ($('.messages[data-room=' + roomName + ']').length < 1) {
-		var messageList = '<ul class="messages" data-room="' + roomName + '"></ul>';
-		$('#main').append(messageList);
+$(document).on('click', '#roomList li', function(){
+	var roomName = $(this).attr('data-room');
+	if (roomName) {
+		showRoom(roomName);
 	}
+	return false;
+});
+$(document).on('click', '#roomList li .close', function(){
+	var roomName = $(this).closest('li').attr('data-room');
+	removeRoom(roomName);
+	return false;
+});
 
-	// HTML for the new room user list
-	if ($('.users[data-room=' + roomName + ']').length < 1) {
-		var userList = '<ul class="users" data-room="' + roomName + '"></ul>';
-		$('#side').append(userList);
-	}
+function removeRoom(roomName) {
+
+	console.log('removeRoom', roomName);
+	// Switch to a new room first
+	$('#roomList li:not([data-roomName='+ roomName + '])').first().click();
+
+	$('.messages[data-room=' + roomName + ']').remove();
+	$('#roomList li[data-room=' + roomName + ']').remove();
+	$('.users[data-room=' + roomName + ']').remove();
 }
 
-function showRoom(roomName) {
+function roomExists(roomName) {
+	if ($('.messages[data-room=' + roomName + ']').length > 0) {
+		return true;
+	}
+	return false;
+}
+
+function addNewRoom(roomName, displayedRoomName, closable) {
+
+	console.log('addNewRoom', roomName, displayedRoomName);
+
+	if (roomExists(roomName)) {
+		//Room already exists
+		console.log('Room already exists');
+		return false;
+	}
+
+	// HTML for the new room
+	var messageList = '<ul class="messages hide" data-room="' + roomName + '"></ul>';
+	$('#main').append(messageList);
+
+	if (!displayedRoomName) {
+		displayedRoomName = roomName;
+	}
+	var roomLi = '<li class="room" data-room="' + roomName + '">';
+	if (closable) {
+		roomLi += '<a class="btn btn-mini btn-danger close"><i class="fa fa-times"></i></a>';
+	}
+	roomLi += displayedRoomName + '</li>';
+	$('#roomList').append(roomLi);
+
+	// HTML for the new room user list
+	var userList = '<ul class="users hide" data-room="' + roomName + '"></ul>';
+	$('#userLists').append(userList);
+
+	return true;
+}
+
+/**
+ * Hide existing message lists and show the list with the given name
+ * Sets the currentRoom to this one
+ * If privateMessagesUserID is given it sets currentPrivateMessagesUserID
+ */
+function showRoom(roomName, privateMessagesUserID, privateMessagesUsername) {
+
+console.log('showRoom', roomName, privateMessagesUserID, privateMessagesUsername);
+
+	stopGlowingRoom(roomName);
 
 	if (roomName == currentRoom) {
+		scrollToNewestMessage(true);
 		return;
 	}
 
 	//Hide other rooms
-	$('.messages').hide();
-	$('.users').hide();
+	$('.messages').addClass('hide');
+	$('.users').addClass('hide');
+	$('#roomList li').removeClass('selected');
+	$('.users li').removeClass('selected');
+
+	//Add room element if it doesn't already exist
+	if (privateMessagesUserID) {
+		addPrivateMessagesRoom(privateMessagesUserID, privateMessagesUsername);
+	} else {
+		addNewRoom(roomName);
+	}
 
 	// Show the new room
-	$('.messages[data-room=' + roomName + ']').show();
-	$('.users[data-room=' + roomName + ']').show();
+	$('.messages[data-room=' + roomName + ']').removeClass('hide');
+	$('.users[data-room=' + roomName + ']').removeClass('hide');
+
+	if (!privateMessagesUserID && $('.messages[data-room=' + roomName + ']').attr('data-privateMessagesUserID')) {
+		privateMessagesUserID = $('.messages[data-room=' + roomName + ']').attr('data-privateMessagesUserID');
+	}
+
+	if (privateMessagesUserID) {
+		currentPrivateMessagesUserID = privateMessagesUserID;
+		//$('.users li[data-userid=' + privateMessagesUserID +']').addClass('selected');
+	} else {
+		currentPrivateMessagesUserID = null;
+	}
+
+	$('#roomList li[data-room='+ roomName +']').addClass('selected');
 
 	currentRoom = roomName;
+	scrollToNewestMessage(true);
 }
+
+function glowRoom(roomName) {
+	$('#roomList li[data-room=' + roomName + ']').addClass('glow');
+}
+
+function stopGlowingRoom(roomName) {
+	$('#roomList li[data-room=' + roomName + ']').removeClass('glow');
+}
+
+
+
 
 // Change username
 function changeUsername(username) {
@@ -120,8 +290,24 @@ function changeUsername(username) {
 // Username changed callback
 socket.on('changedUsername', function(res){
 	console.log('changedUsername', res);
-	user = res.user;
+	if (res.user) {
+		user = res.user;
+		$('#newMessage').show();
+		$('#newMessage textarea').show();
+		$('#newMessageUnregistered').hide();
+	} else {
+		user = null;
+		$('#newMessage').show();
+		$('#newMessage textarea').hide();
+		$('#newMessageUnregistered').show();
+	}
+
 });
+
+
+
+
+
 
 
 /**
@@ -134,62 +320,171 @@ function setUsers(room, users) {
 		var user = users[i];
 		addUser(room, user);
 	}
+
+	sortUsers($('.users[data-room=' + room + ']'));
 }
 
 function addUser(room, user) {
+
+	if ($('.users[data-room=' + room + '] li[data-userid=' + user.userID + ']').length > 0) {
+		//Only show each userID once
+		return false;
+	}
+
 	var html = makeUserHTML(user);
 	$('.users[data-room=' + room + ']').append(html);
+
+	sortUsers($('.users[data-room=' + room + ']'));
 }
 
 function removeUser(room, user) {
-	$('.users[data-room=' + room + '] li[data-id=' + user.id + ']').remove();
+	$('.users[data-room=' + room + '] li[data-socketid=' + user.id + ']').remove();
+
+	sortUsers($('.users[data-room=' + room + ']'));
 }
 
-function makeUserHTML(user) {
-	var u = '<li data-id="' + user.id + '">';
-		u += '<img class="avatar" src="' + user.avatar + '" />';
-		u += user.username;
+function removeUserEverywhere(user) {
+	$('.users li[data-socketid=' + user.id + ']').remove();
+}
+
+function makeUserHTML(thisUser) {
+	var u = '<li data-socketid="' + thisUser.id + '" data-userid="' + thisUser.userID + '">';
+
+		//If this user is not the current logged in user
+		if (user && thisUser.userID != user.userID) {
+
+			if (user.admin) {
+				u += '<a class="ban btn btn-mini btn-danger" title="Ban User"><i class="fa fa-ban"></i></a> ';
+				u += '<a class="kick btn btn-mini btn-warning" title="Kick User"><i class="fa fa-times"></i></a> ';
+			}
+
+			u += '<a class="privateChat btn btn-mini btn-primary" title="Private Chat"><i class="fa fa-comment"></i></a> ';
+		}
+
+		u += '<img class="avatar" src="' + thisUser.avatar + '" />';
+		u += thisUser.username;
+
 	u += '</li>';
 	return u;
 }
+
+$(document).on('click', '.users li', function(e) {
+	var userID = $(this).closest('li').attr('data-userid');
+	if (userID != user.userID) {
+		var username = $(this).closest('li').text();
+		showPrivateMessages(userID, username);
+		return false;
+	}
+});
+
+$(document).on('click', '.privateChat', function(e){
+	var userID = $(this).closest('li').attr('data-userid');
+	var username = $(this).closest('li').text();
+	showPrivateMessages(userID, username);
+	return false;
+});
+
+$(document).on('click', '.kick', function(e){
+	var userID = $(this).closest('li').attr('data-userid');
+	var reason = prompt("Enter a reason for kicking this user:");
+	if (reason === null) {
+		return false;
+	}
+	socket.emit('kick', {userID:userID, reason:reason});
+	return false;
+});
+
+$(document).on('click', '.ban', function(e){
+	var userID = $(this).closest('li').attr('data-userid');
+	var reason = prompt("Enter a reason for banning this user:");
+	if (reason === null) {
+		return false;
+	}
+	socket.emit('ban', {userID:userID, reason:reason});
+	return false;
+});
+
+function sortUsers(list) {
+	var listItems = list.children('li').get();
+	listItems.sort(function(a, b) {
+		return $(a).text().trim().toUpperCase().localeCompare($(b).text().trim().toUpperCase());
+	});
+	$.each(listItems, function(idx, itm) {
+		list.append(itm);
+	});
+}
+
 
 
 /**
  * Displaying Messages
  */
 
-function makeMessageHTML(message) {
+function makeMessageHTML(message, privateMessage) {
 	//Newlines to line breaks
 	message.text = nl2br(message.text);
-	var m = '<li>';
+	var m = '<li';
+		if (message.messageID) {
+			m += ' data-messageID="' + message.messageID + '" ';
+		}
+
+		if (message.tempMessageID) {
+			m += ' data-tempMessageID="' + message.tempMessageID + '" ';
+		}
+
+	m += '>';
 		m += '<h4 class="author">';
 			m += '<img class="avatar" src="' + message.from.avatar + '" />';
 			m += '<span class="name">' + message.from.username + '</span>';
 		m += '</h4>';
 		m += '<time>' + formatTime(message.date) + '</time>';
-		m += '<p>' + message.text + '</p>';
+		m += '<p>';
+		if (!privateMessage && user.admin) {
+			m += '<a class="btn btn-mini btn-danger deleteMessage"><i class="fa fa-trash-o"></i></a>';
+		}
+		m += message.text + '</p>';
 	m += '</li>';
 	return m;
 }
 
-function showMessage(message, sound) {
+function showMessage(message, sound, privateMessage) {
 	console.log('Message received: ', message);
 	if (!(message.date instanceof Date)) {
 		//Convert date string back into a date object
 		message.date = new Date(message.date);
 	}
 
-	var html = makeMessageHTML(message);
+	var html = makeMessageHTML(message, privateMessage);
 	$('.messages[data-room=' + message.room + ']').append(html);
 
 	// Play a sound
 	if (sound === true) {
-		playSound('message');
+		if (privateMessage) {
+			playSound('privateMessage');
+		} else {
+			playSound('message');
+		}
 	}
 
 	// Scroll to message
 	scrollToNewestMessage();
+
+	// Flash room name if the message isn't in the current room
+	if (message.room != currentRoom) {
+		glowRoom(message.room);
+	}
 }
+
+$(document).on('click', '.deleteMessage', function()
+{
+	var msg = $(this).closest('li');
+	var messageID = $(msg).attr('data-messageid');
+	if (messageID) {
+		socket.emit('deleteMessage', {room: currentRoom, messageID:messageID});
+		$(msg).remove();
+	}
+	return false;
+});
 
 
 /**
@@ -197,14 +492,26 @@ function showMessage(message, sound) {
  */
 
 // Show an info message in the current room
-function showInfoMessage(text, classes, id) {
+function showInfoMessage(text, icon, classes, id, room, prepend) {
+
+	if (icon) {
+		text = '<i class="fa fa-' + icon + '"></i> ' + text;
+	}
 
 	var html = '<li class="info ' + (classes ? classes : '') + '" id="' + (id ? id : '') + '">';
 		html += '<time>' + formatTime() + '</time>';
 		html += '<p>' + text + '</p>';
 	html += '</li>';
 
-	$('.messages[data-room=' + currentRoom + ']').append(html);
+	if (!room) {
+		room = currentRoom;
+	}
+
+	if (prepend) {
+		$('.messages[data-room=' + room + ']').prepend(html);
+	} else {
+		$('.messages[data-room=' + room + ']').append(html);
+	}
 
 	scrollToNewestMessage();
 }
@@ -220,35 +527,71 @@ socket.on('message', function(message) {
 	showMessage(message, true);
 });
 
+socket.on('messageDeleted', function(messageID) {
+	try {
+		$('.messages li[data-messageid=' + messageID +']').remove();
+	} catch(e) {
+		console.log(e);
+	}
+});
+
 // User joins
 socket.on('userJoin', function(user){
 	console.log('userJoin', user);
 	addUser(user.room, user);
-	showInfoMessage(user.username + ' joined', 'green');
+	showInfoMessage(user.username + ' joined', 'plus', 'green', '', user.room);
 });
 
 // User leaves
 socket.on('userLeave', function(user){
 	console.log('userLeave', user);
 	removeUser(user.room, user);
-	showInfoMessage(user.username + ' left', 'red');
+	showInfoMessage(user.username + ' left', 'minus', 'red');
 });
 
 //Sending a message
 $(document).on('submit', '#newMessage', function() {
+
+	if (!user) {
+		return false;
+	}
+
+	var tempMessageID = uniqid();
+
 	var newMessageText = $(this).children('#newMessage textarea');
 	var text = newMessageText.val();
 	if (!text) {
 		return false;
 	}
 
-	var message = {
-		room: currentRoom,
-		text: text,
-	};
+	var message;
+	var privateMessage = false;
 
-	//Send message
-	socket.emit('message', message);
+	if (currentPrivateMessagesUserID) {
+
+		message = {
+			tempMessageID: tempMessageID,
+			to: currentPrivateMessagesUserID,
+			text:text,
+		};
+
+		//Send private message
+		socket.emit('privateMessage', message);
+		message.room = 'privateMessages' + currentPrivateMessagesUserID;
+
+	} else {
+
+		message = {
+			tempMessageID: tempMessageID,
+			room: currentRoom,
+			text: text,
+		};
+
+		//Send message
+		socket.emit('message', message);
+
+	}
+
 
 	//Add the things we need to display the message but didn't need to send to the server
 	message.date = new Date();
@@ -273,6 +616,71 @@ $(document).on('keydown', '#newMessage textarea', function(e) {
 		return false;
 	}
 });
+
+socket.on('messageSent', function(res){
+	// Add the real messageID in place of the temp message ID
+	$('.messages li[data-tempmessageid=' + res.data.tempMessageID +']').attr('data-messageid', res.message.messageID);
+});
+
+
+/**
+ * Private Messaging
+ */
+
+function showPrivateMessages(userID, username) {
+
+	console.log('showPrivateMessages', userID, username);
+	showRoom('privateMessages' + userID, userID, username);
+
+}
+
+function addPrivateMessagesRoom(userID, username) {
+
+	var roomName = 'privateMessages' + userID;
+	var displayedRoomName = '<i class="fa fa-lock"></i> ' + username;
+
+	if (addNewRoom(roomName, displayedRoomName, true)) {
+
+		$('.messages[data-room=' + roomName + ']').attr('data-privateMessagesUserID', userID);
+
+		showInfoMessage('Private chat with ' + username + '.', 'lock', 'blue', '', roomName, true);
+
+		//Add the users
+
+		// Add current user
+		$('.users[data-room=' + roomName + ']').append(
+			$('.users li[data-userid=' + user.userID +']').first().clone()
+		);
+
+		// Add user chatting with
+		$('.users[data-room=' + roomName + ']').append(
+			$('.users li[data-userid=' + userID +']').first().clone()
+		);
+
+		sortUsers($('.users[data-room=' + roomName + ']'));
+
+		return true;
+	}
+
+	return false;
+}
+
+// Private message received
+socket.on('privateMessage', function(privateMessage) {
+
+	console.log('privateMessage', privateMessage);
+
+	var roomName ='privateMessages' + privateMessage.from.userID;
+
+	if (!roomExists(roomName)) {
+		addPrivateMessagesRoom(privateMessage.from.userID, privateMessage.from.username);
+	}
+
+	// Add the message to the room
+	privateMessage.room = roomName;
+	showMessage(privateMessage, true, true);
+});
+
 
 
 
@@ -361,11 +769,11 @@ function scrollToTop() {
 	$('html, body').stop().animate({ scrollTop: 0 }, 200);
 }
 
-function scrollToNewestMessage() {
+function scrollToNewestMessage(always) {
 
 	// If we weren't at the bottom before, don't try and scroll down
 	// (that's the annoying part)
-	if (!atBottom) {
+	if (!always && !atBottom) {
 		return false;
 	}
 

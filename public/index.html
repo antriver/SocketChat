@@ -3,26 +3,65 @@
 <head>
 
 	<title>Top Site List Chat</title>
+	<link rel="stylesheet" type="text/css" href="assets/css/bootstrap-buttons.min.css" />
+	<link rel="stylesheet" type="text/css" href="assets/css/social-bootstrap-buttons.css" />
 	<link rel="stylesheet" type="text/css" href="assets/css/style.css" />
+	<link rel="stylesheet" type="text/css" href="/assets/fontawesome/font-awesome.min.css" />
+
 	<meta name="viewport" content="width=default-width; user-scalable=no; initial-scale=1.0; maximum-scale=1.0;" />
+
+	<meta property="og:title" content="Top Site List Planet Chat Room"/>
+	<meta property="og:description" content="Come relax and have a chat." />
+	<meta property="fb:app_id" content="584094814987312"/>
+	<meta property="og:site_name" content="Top Site List"/>
+	<meta property="og:url" content="http://www.top-site-list.com/chat/"/>
+	<meta property="og:image" content="http://www.top-site-list.com/assets/img/logo.png"/>
+	<meta property="og:type" content="website" />
 
 </head>
 <body>
 
 <div id="main"></div>
 
-<div id="side"></div>
+<div id="side">
+
+	<h3>Rooms</h3>
+	<ul id="roomList"></ul>
+
+	<div id="userLists">
+		<h3>Who's Online</h3>
+	</div>
+
+	<div id="share">
+		<h3>Invite Your Friends To Chat</h3>
+	</div>
+
+</div>
 
 <div id="footer">
-	<form id="newMessage">
+
+	<form id="newMessage" style="display:none;">
 		<textarea placeholder="Write a message!"></textarea>
+		<div id="newMessageUnregistered" style="display:none;"><p>You must <a class="btn btn-mini" href="/login">Login</a> or <a class="btn-success btn btn-mini" href="/signup">Signup</a> to participate in the chat.</p></div>
 	</form>
+
+	<div id="controls">
+		<a class="btn btn-mini" id="soundToggle" href="#"></a>
+	</div>
+
+
+	<div id="logo">
+		<a href="/"><img src="http://www.top-site-list.com/assets/img/logo.png" alt="Top Site List Planet" /></a>
+	</div>
+
 </div>
 
 <!-- Javascript -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="socket.io/socket.io.js"></script>
+<script src="assets/js/jquery.cookie.min.js"></script>
 <script src="assets/js/client.js"></script>
+<script src="assets/js/tslchat.js"></script>
 
 </body>
 </html>

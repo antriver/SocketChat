@@ -1,0 +1,107 @@
+.btn-social-email {
+	color: #FFFFFF;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+	background-color: #323a46;
+	*background-color: #323a46;
+	background-image: -moz-linear-gradient(top, #323A46, #323a46);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#323A46), to(#323a46));
+	background-image: -webkit-linear-gradient(top, #323A46, #323a46);
+	background-image: -o-linear-gradient(top, #323A46, #323a46);
+	background-image: linear-gradient(to bottom, #323A46, #323a46);
+	background-repeat: repeat-x;
+	border-color: #323a46;
+	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#323A46', endColorstr='#323a46', GradientType=0);
+	filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
+.btn-social-email:hover,
+.btn-social-email:focus,
+.btn-social-email:active,
+.btn-social-email.active,
+.btn-social-email.disabled,
+.btn-social-email[disabled] {
+	color: #FFFFFF;
+	background-color: #323a46;
+	*background-color: #003bb3;
+}
+
+.btn-social-facebook {
+	color: #FFFFFF;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+	background-color: #2980B9;
+	*background-color: #2980B9;
+	background-image: -moz-linear-gradient(top, #2980B9, #2980B9);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#2980B9), to(#2980B9));
+	background-image: -webkit-linear-gradient(top, #2980B9, #2980B9);
+	background-image: -o-linear-gradient(top, #2980B9, #2980B9);
+	background-image: linear-gradient(to bottom, #2980B9, #2980B9);
+	background-repeat: repeat-x;
+	border-color: #2980B9;
+	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#2980B9', endColorstr='#2980B9', GradientType=0);
+	filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
+.btn-social-facebook:hover,
+.btn-social-facebook:focus,
+.btn-social-facebook:active,
+.btn-social-facebook.active,
+.btn-social-facebook.disabled,
+.btn-social-facebook[disabled] {
+	color: #FFFFFF;
+	background-color: #2980B9;
+	*background-color: #003bb3;
+}
+
+.btn-social-twitter {
+	color: #FFFFFF;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+	background-color: #3498DB;
+	*background-color: #3498DB;
+	background-image: -moz-linear-gradient(top, #3498DB, #3498DB);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#3498DB), to(#3498DB));
+	background-image: -webkit-linear-gradient(top, #3498DB, #3498DB);
+	background-image: -o-linear-gradient(top, #3498DB, #3498DB);
+	background-image: linear-gradient(to bottom, #3498DB, #3498DB);
+	background-repeat: repeat-x;
+	border-color: #3498DB;
+	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#3498DB', endColorstr='#3498DB', GradientType=0);
+	filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
+.btn-social-twitter:hover,
+.btn-social-twitter:focus,
+.btn-social-twitter:active,
+.btn-social-twitter.active,
+.btn-social-twitter.disabled,
+.btn-social-twitter[disabled] {
+	color: #FFFFFF;
+	background-color: #3498DB;
+	*background-color: #003bb3;
+}
+
+.btn-social-tumblr {
+	color: #FFFFFF;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+	background-color: #2C4762;
+	*background-color: #2C4762;
+	background-image: -moz-linear-gradient(top, #2C4762, #2C4762);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#2C4762), to(#2C4762));
+	background-image: -webkit-linear-gradient(top, #2C4762, #2C4762);
+	background-image: -o-linear-gradient(top, #2C4762, #2C4762);
+	background-image: linear-gradient(to bottom, #2C4762, #2C4762);
+	background-repeat: repeat-x;
+	border-color: #2C4762;
+	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#2C4762', endColorstr='#2C4762', GradientType=0);
+	filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
+.btn-social-tumblr:hover,
+.btn-social-tumblr:focus,
+.btn-social-tumblr:active,
+.btn-social-tumblr.active,
+.btn-social-tumblr.disabled,
+.btn-social-tumblr[disabled] {
+	color: #FFFFFF;
+	background-color: #2C4762;
+	*background-color: #003bb3;
+}

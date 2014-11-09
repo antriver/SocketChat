@@ -49,7 +49,7 @@ body {
 }
 
 #footer {
-	background:#333;
+	background:#444;
 	color:#fff;
 	height:100px;
 	position:fixed;
@@ -62,6 +62,70 @@ body {
 	/* This should be the width of the sidebar */
 	padding-right: 20%;
 }
+
+#controls {
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	width: calc(16% - 12px);
+	bottom: 12px;
+}
+
+#controls,
+#logo,
+#newMessageUnregistered {
+	text-align: center;
+
+	display: -moz-box;
+	display: -webkit-box;
+	display: box;
+
+	-moz-box-orient: horizontal;
+	-ms-box-orient: horizontal;
+	-webkit-box-orient: horizontal;
+	box-orient: horizontal;
+
+	-moz-box-pack: center;
+	-ms-box-pack: center;
+	-webkit-box-pack: center;
+	box-pack: center;
+
+	-moz-box-align: center;
+	-ms-box-align: center;
+	-webkit-box-align: center;
+	box-align: center;
+}
+
+#logo {
+	width:20%;
+	position: absolute;
+	right:12px;
+	top:12px;
+	bottom:12px;
+	width: calc(20% - 12px);
+}
+	#logo img {
+		max-width: 80%;
+	}
+
+#share {
+	position: absolute;
+	bottom:112px;
+	left:12px;
+	right:12px;
+	text-align:center;
+}
+	#share h3 {
+		text-align:left;
+	}
+
+	#share a {
+		margin:0 2px;
+	}
+
+	#share .btn {
+		width: 26px;
+	}
 
 /**
  * Message List
@@ -124,6 +188,15 @@ body {
 			line-height:22px;
 		}
 
+		.messages .deleteMessage {
+			float:right;
+			display:none;
+		}
+
+		.messages li:hover .deleteMessage {
+			display:inline-block;
+		}
+
 /**
  * Info messages
  */
@@ -145,49 +218,100 @@ body {
 
 
 /**
- * User List
+ * Room & User List
  */
 
-.users {
+#side h3 {
+	font-size: 12px;
+	margin-bottom: 5px;
+	border-bottom: 1px #DDD solid;
+	padding-bottom: 5px;
+	color: #999;
+	padding-left: 5px;
+}
+
+#roomList {
+	margin-bottom:10px;
+}
+
+#side li.glow {
+	-webkit-animation: glow 3s infinite; /* Chrome, Safari 5+ */
+	-moz-animation: glow 3s infinite; /* Firefox 5-15 */
+	-o-animation: glow 3s infinite; /* Opera 12.00 */
+	animation: glow 3s infinite; /* Chrome, Firefox 16+, IE 10+, Opera 12.10+ */
+}
+
+@-webkit-keyframes glow {
+  0%   { background:rgba(0,0,0,0); }
+  50%  { background: rgba(0,0,0,.15); }
+  100% { background: rgba(0,0,0,0); }
+}
+@-moz-keyframes glow {
+  0%   { background:rgba(0,0,0,0); }
+  50%  { background: rgba(0,0,0,.15); }
+  100% { background: rgba(0,0,0,0); }
+}
+@-o-keyframes glow {
+  0%   { background:rgba(0,0,0,0); }
+  50%  { background: rgba(0,0,0,.15); }
+  100% { background: rgba(0,0,0,0); }
+}
+@keyframes glow {
+  0%   { background:rgba(0,0,0,0); }
+  50%  { background: rgba(0,0,0,.15); }
+  100% { background: rgba(0,0,0,0); }
+}
+
+
+#side ul {
 	list-style:none;
 }
 
-	.users li {
+	#side ul li {
 		padding:5px;
 		display:block;
 		line-height:25px;
 		font-size:12px;
 		position: relative;
 		white-space: nowrap;
+
+		-webkit-transition: all 0.2s ease-out;  /* Chrome 1-25, Safari 3.2+ */
+		-moz-transition: all 0.2s ease-out;  /* Firefox 4-15 */
+		-o-transition: all 0.2s ease-out;  /* Opera 10.50–12.00 */
+		transition: all 0.2s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.10+ */
 	}
-		.users li:hover {
-			background:rgba(0,0,0,.1);
+		#side ul li:hover {
+			background:rgba(0,0,0,.05);
 			cursor:pointer;
 		}
-		.users li.selected {
-			background:rgba(0,0,0,.3);
+		#side ul li.selected {
+			background:rgba(255,255,255,1);
+			/* Make it go all the way to the left */
+			margin-left: -12px;
+			padding-left: 17px;
 		}
-		.users li.away {
+		#side ul li.away {
 			opacity:.5;
+		}
+
+		#side ul .btn {
+			float:right;
+			margin: 1px 0 0 2px;
 		}
 
 		.typingIndicator {
 			display:none;
 		}
 
-	.users .avatar {
+	#side ul .avatar {
 		margin:0;
 		width:25px;
 		height:25px;
 		vertical-align: middle;
 		margin-right:5px;
 	}
-	.users a {
-		text-decoration: none;
-		color:#222;
-		font-weight:bold;
-	}
-	.users .newPMIndicator {
+
+	#side ul .newPMIndicator {
 		display:none;
 	}
 
@@ -218,11 +342,109 @@ body {
 		outline:none;
 	}
 
-@media only screen and (max-device-width: 480px) {
-	#left { width:100%; margin-bottom:0; }
-	#right { display:none; }
-	#footer { position:static; }
-	.message h4 .avatar { float:none; margin:0; }
-	.message h4 .username { clear:both; font-size:9px; }
-	#footer { height:80px; }
+	#newMessageUnregistered {
+		color:#fff;
+		text-align:center;
+		margin-left:20%;
+		height: 100%;
+	}
+
+	#footer a {
+		text-decoration: none;
+	}
+
+/**
+ * Slim view
+ */
+@media only screen and (max-width: 480px) {
+	#main {
+		width:calc(100% - 53px);
+		margin-bottom:0; }
+
+	#side {
+		width:50px;
+	}
+		#side h3 {
+			display:none;
+		}
+		#roomList {
+			display:none;
+		}
+		.users .btn {
+			display:none;
+		}
+		#side ul li {
+			padding:0;
+			margin-bottom:5px;
+		}
+		#side ul .avatar {
+			width:25px;
+			height:25px;
+			margin-right:100px
+		}
+		#share {
+			bottom:120px;
+		}
+		#share a {
+			margin-top:1px
+		}
+	#footer {
+		position:relative;
+		height:auto;
+		padding:0;
+	}
+		#controls {
+			position: static;
+			width: auto;
+			margin: -7px 0 0 0;
+			padding-bottom: 7px;
+		}
+		#newMessage {
+			height:auto;
+		}
+		#newMessage textarea {
+			height: 65px;
+		}
+		#newMessage textarea,
+		#newMessageUnregistered {
+			margin-left:0;
+			width:100%;
+		}
+		#newMessageUnregistered {
+			font-size: 13px;
+			height: auto;
+		}
+		#logo {
+			display:none;
+		}
+
+	.messages li {
+		padding-left:15%;
+	}
+	.messages .info {
+		padding-left:0;
+	}
+	.messages .info p {
+		padding: 0;
+		margin: 14px;
+	}
+	.messages .author {
+		line-height:16px;
+		width:15%;
+	}
+	.messages .avatar {
+		width:16px;
+		height:16px;
+		float:right;
+	}
+	.messages .name {
+		clear:both;
+		white-space:normal;
+		display:block;
+	}
+	.messages time {
+		display:none;
+	}
+
+
 }
