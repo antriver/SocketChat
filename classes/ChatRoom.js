@@ -20,7 +20,7 @@ var ChatRoom = function(name, displayName, logger) {
 	// Logging messages to database
 	this.logger = logger;
 
-	// Overrid ethe toJSON method, because when serialising this object
+	// Override the to JSON method, because when serialising this object
 	// to send to the client, we don't want to send the logging stuff etc.
 	this.toJSON = function() {
         return {

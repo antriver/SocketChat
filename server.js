@@ -8,13 +8,23 @@ var request = require('request');
 
 app.use(express.cookieParser());
 
-var CFG = require('./config.js');
+
+
+// Classes
+var config = require('./config.js');
 var ChatRoom = require('./classes/ChatRoom.js');
 var ChatUser = require('./classes/ChatUser.js');
 var DatabaseLogger = require('./classes/DatabaseLogger.js');
 
-//Start server on port 3000
+
+
+// Start server on port 3000
 server.listen(3000);
+
+// Reduce number of io debug messages
+io.set('log level', 2);
+
+
 
 /**
  * Routes
@@ -31,16 +41,22 @@ app.get('/status.json', function (req, res) {
 	res.json(status);
 });
 
-//Reduce number of io debug messages
-io.set('log level', 2);
 
 
 /**
- * TSL Cookie Authorization
+ * Cookie Authentication
  */
 io.set('authorization', function (handshakeData, accept) {
 
-	if (!handshakeData.headers.cookie) {
+	var user = {
+		id: 1,
+		username: 'Anthony',
+		avatar: ''
+	};
+	handshakeData.user = user;
+	accept(null, true);
+
+	/*if (!handshakeData.headers.cookie) {
 		accept("No session cookie", false);
 		return;
 	}
@@ -74,9 +90,9 @@ io.set('authorization', function (handshakeData, accept) {
 				//if they are logged in or not
 				acceptHandshakeIfNotBanned(handshakeData, accept);
 
-				/*} else {
+				} else {
 					accept("User not logged in", false);
-				}*/
+				}
 
 			} else {
 				accept("Unable to authenticate with TSL server", false);
@@ -85,48 +101,10 @@ io.set('authorization', function (handshakeData, accept) {
 	} else {
 		acceptHandshakeIfNotBanned(handshakeData, accept);
 		//accept("No session cookie", false);
-	}
+	} */
+
 });
 
-function acceptHandshakeIfNotBanned(handshakeData, accept) {
-
-	var IP = handshakeData.headers['x-forwarded-for'];
-
-	var qs = {
-		IP: IP
-	};
-
-	if (handshakeData.user) {
-		qs.userID = handshakeData.user.id;
-	}
-
-	request({
-		url: 'http://www.top-site-list.com/api/banned.php',
-		qs: qs
-	}, function(error, response, body) {
-
-		if (!error && response.statusCode == 200) {
-
-			try {
-				console.log(body);
-				res = JSON.parse(body);
-			} catch(e) {
-				accept("TSL API error' " + e, false);
-			}
-			console.log(res);
-
-			if (res.banned) {
-				accept(res.message, false);
-			} else {
-				accept(null, true);
-			}
-
-		} else {
-			accept(res.message, false);
-		}
-	});
-
-}
 
 
 
@@ -136,8 +114,8 @@ function acceptHandshakeIfNotBanned(handshakeData, accept) {
 
 // List of available rooms
 var rooms = {
-	lobby: new ChatRoom('lobby', 'Top Site List Chat', new DatabaseLogger(CFG)),
-	//otherroom: new ChatRoom('otherroom', new DatabaseLogger(CFG))
+	lobby: new ChatRoom('lobby', 'Lobby', new DatabaseLogger(config.log)),
+	//otherroom: new ChatRoom('otherroom', new DatabaseLogger(config.log))
 };
 
 // List of connected clients
@@ -502,22 +480,20 @@ function api(endpoint, params, success, error) {
 /**
  * For demo purposes
  */
-/*
-//Create a "server" user
-var serverUser = new ChatUser(0, 0, 'Quote Bot', 'http://www.top-site-list.com/assets/img/default-avatar.jpg');
-users[0] = serverUser;
+// Create an example user
+var exampleUser = new ChatUser(0, 0, 'Example User', '');
+users[0] = exampleUser;
 
-//Put serverUser in the lobby
-//
-rooms.lobby.users[0] = serverUser;
+// Put exampleUser in the lobby
+rooms.lobby.users[0] = exampleUser;
 //Send a message every 30 seconds just for testing
 setInterval(function(){
 
 	io.sockets.emit('message', {
 		room: 'lobby',
-		from: serverUser,
+		from: exampleUser,
 		date: new Date(),
 		text: 'Hello, I\'m the server. Sending you a message so you can see this is still alive. The time is ' + new Date().toUTCString()
 	});
 
-}, 60000);*/
+}, 10000);

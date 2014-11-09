@@ -331,6 +331,7 @@ body {
 }
 
 	#newMessage textarea {
+		color:#222;
 		padding: 14px;
 		width: 80%;
 		margin-left:20%;

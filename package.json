@@ -1,15 +1,15 @@
 {
-	"name": "SocketChat",
-	"preferGlobal": false,
-	"version": "1.1.0",
-	"author": "Anthony Kuske <www.anthonykuske.com>",
-	"description": "Chat room built using socket.io",
-	"dependencies": {
-		"express" : "latest",
-		"request" : "latest",
-		"socket.io" : "latest",
-		"cookie" : "latest",
-		"mysql2": "latest",
-		"html-entities": "latest"
-	}
+  "name": "SocketChat",
+  "preferGlobal": false,
+  "version": "1.1.0",
+  "author": "Anthony Kuske <www.anthonykuske.com>",
+  "description": "Chat room built using socket.io",
+  "dependencies": {
+    "express": "3.4.8",
+    "request": "2.34.0",
+    "socket.io": "0.9.16",
+    "cookie": "0.1.1",
+    "mysql2": "0.11.6",
+    "html-entities": "1.0.10"
+  }
 }

@@ -15,8 +15,8 @@ var mysql = require('mysql2');
  * New DatabaseLogger instance
  * @param object CFG Object containing MySQL connection settings
  */
-var DatabaseLogger = function(CFG) {
-	this.CFG = CFG;
+var DatabaseLogger = function(config) {
+	this.config = config;
 
 	// Store messages here for writing periodically
 	this.buffer = [];
@@ -32,7 +32,7 @@ DatabaseLogger.prototype.log = function(message) {
 
 	this.buffer.push(message);
 
-	if (this.buffer.length >= 10) {
+	if (this.buffer.length >= this.config.flushMessages) {
 		this.writeToDB();
 	}
 
@@ -50,10 +50,10 @@ DatabaseLogger.prototype.connect = function() {
 	}
 
 	this.DB = DB = mysql.createConnection({
-		host: this.CFG.DB_SERVER,
-		user: this.CFG.DB_USER,
-		password: this.CFG.DB_PASS,
-		database: this.CFG.DB_NAME
+		host: this.config.db.server,
+		user: this.config.db.user,
+		password: this.config.db.pass,
+		database: this.config.db.name
 	});
 
 	this.connected = true;
@@ -79,9 +79,9 @@ DatabaseLogger.prototype.startTimer = function() {
 	this.stopTimer();
 	var self = this;
 	this.timer = setTimeout(function(){
-		//console.log('[Logger] Timer done');
+		console.log('[Logger] Timer done');
 		self.writeToDB();
-	}, 10000);
+	}, this.config.flushSeconds * 1000);
 };
 
 DatabaseLogger.prototype.stopTimer = function() {
@@ -196,7 +196,7 @@ DatabaseLogger.prototype.writeMessage = function(message, callback) {
 		queryPlaceholders.push('?');
 	}
 
-	var query = 'INSERT INTO ' +  this.CFG.LOG_TABLE + ' (' + cols.join(',') + ') ';
+	var query = 'INSERT INTO ' +  this.config.db.table + ' (' + cols.join(',') + ') ';
 	query += 'VALUES(' + queryPlaceholders.join(',')+ ')';
 
 	//console.log(query);
@@ -273,7 +273,7 @@ DatabaseLogger.prototype.writeUpdates = function(callback) {
 DatabaseLogger.prototype.updateEntry = function(where, set, callback) {
 
 	// Build the query
-	var query = 'UPDATE ' +  this.CFG.LOG_TABLE + ' SET ';
+	var query = 'UPDATE ' +  this.config.db.table + ' SET ';
 	var values = [];
 
 	var setQuery = [];

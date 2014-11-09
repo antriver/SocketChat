@@ -45,7 +45,7 @@ socket.on('error', function(data) {
 	console.log(data);
 	if (data == 'handshake error') {
 		//Not logged in
-		window.location = 'http://www.top-site-list.com/login.php?next=/chat';
+		window.location = '/path/to/login';
 	}
 });
 
@@ -152,7 +152,7 @@ socket.on('changedRoom', function(res){
 	} else {
 		str = "There are " + Object.size(res.room.users) + " people chatting.";
 	}
-	showInfoMessage("Welcome to Top Site List Planet chat! " + str, 'check');
+	showInfoMessage("Welcome to the chat! " + str, 'check');
 
 	if (!user) {
 		showInfoMessage('Without logging in you can only view the chat. Please <a href="/login">login</a> or <a href="/signup">signup</a> to talk in the chat.', 'user', 'red');
